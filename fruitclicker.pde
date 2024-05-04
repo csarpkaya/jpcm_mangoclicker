@@ -9,8 +9,13 @@ int autoClickerCount = 0;
 int upgradePrice = 50;
 int lastUpdateTime = 0;
 int fertilizerPrice = 200; // New upgrade price
-boolean fertilizerActive = false; // New upgrade status
+int fertilizerCount = 0;
 
+// Sounds, die wir abspielen wollen, wenn etwas gemacht wird
+SoundFile soundUpgrade;
+SoundFile soundAutoClickerBuy;
+SoundFile soundFeritlizerBuy;
+SoundFile soundBackgroundMusic;
 
 void setup() {
   size(1920, 1200);
@@ -20,7 +25,12 @@ void setup() {
   mangoY = height / 2 - mangoSize / 2;
   textSize(24);
   
-
+  soundUpgrade = new SoundFile(this, "./sounds/Rise01.mp3");
+  soundAutoClickerBuy = new SoundFile(this, "./sounds/Rise02.mp3");
+  soundFeritlizerBuy = new SoundFile(this, "./sounds/Rise04.mp3");
+  soundBackgroundMusic = new SoundFile(this, "./sounds/sakura.mp3");
+  soundBackgroundMusic.amp(0.05);
+  soundBackgroundMusic.loop(1);
 }
 
 void draw() {
@@ -55,7 +65,7 @@ void draw() {
   // Update auto clickers
   if (millis() - lastUpdateTime > 1000) { // Update every second
     int additionalmangos = autoClickerCount;
-    if (fertilizerActive) { additionalmangos *= 2; } // Double output if fertilizer is active
+    if (fertilizerCount > 0) { additionalmangos *= (1 + fertilizerCount); } // Double output if fertilizer is active
     mangoCount += additionalmangos;
     lastUpdateTime = millis();
   }
@@ -68,8 +78,6 @@ void mousePressed() {
   if (mouseX > mangoX && mouseX < mangoX + mangoSize && mouseY > mangoY && mouseY < mangoY + mangoSize) {
     //change mango size here
     mangoCount += mangosPerClick;
-    // Play click sound effect here
-    
   }
 
   // Check if upgrade button is clicked
@@ -78,7 +86,7 @@ void mousePressed() {
       mangoCount -= upgradePrice;
       mangosPerClick++;
       upgradePrice *= 2; // Increase the price for the next upgrade
-      // Play upgrade sound effect here
+      soundUpgrade.play();
     }
   }
 
@@ -88,7 +96,7 @@ void mousePressed() {
       mangoCount -= autoClickerPrice;
       autoClickerCount++;
       autoClickerPrice *= 2; // Increase the price for the next auto clicker
-      // Play auto clicker purchase sound here
+      soundAutoClickerBuy.play();
     }
   }
 
@@ -96,9 +104,10 @@ void mousePressed() {
   if (mouseX > 50 && mouseX < 350 && mouseY > 150 && mouseY < 180) {
     if (mangoCount >= fertilizerPrice) {
       mangoCount -= fertilizerPrice;
-      fertilizerActive = true; // Activate the fertilizer upgrade
+      fertilizerCount++;
       fertilizerPrice *= 3; // Increase the price for the next purchase
-      // Play fertilizer purchase sound here
+      fertilizerPrice /= 2;
+      soundFeritlizerBuy.play();
     }
   }
 }
